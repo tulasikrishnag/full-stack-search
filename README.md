@@ -120,6 +120,8 @@ Back-end:
 - Improve error handling and logging.
 - Extend mongodb query to include skip and limit for better performance if the data grows largely depends on the business need.
 - Add authentication to validate the request. 
+- Add composite index to the hotel collection to undergo index scan versus full table scan.
+- Since the seeded data is snake case declared the types to match which violates the camelcase naming conventions, which needs to be addressed .
 
 
 
