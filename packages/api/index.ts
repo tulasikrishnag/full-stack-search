@@ -1,38 +1,36 @@
 import express from "express";
 import dotenv from "dotenv";
-import cors from 'cors';
-import { MongoClient } from "mongodb";
-
+import cors from "cors";
+import { startServer } from "./db/server";
+import { gracefulShutdown } from "./lib/db";
+import { hotelRouter } from "./routes/hotel";
 dotenv.config();
 
-if (process.env.NODE_ENV !== 'production' && !process.env.DATABASE_URL) {
-  await import('./db/startAndSeedMemoryDB');
+if (process.env.NODE_ENV !== "production" && !process.env.DATABASE_URL) {
+  await startServer();
 }
 
 const PORT = process.env.PORT || 3001;
-if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
+if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set");
 const DATABASE_URL = process.env.DATABASE_URL;
 
 const app = express();
 
-app.use(cors())
+app.use(cors());
 app.use(express.json());
-
-app.get('/hotels', async (req, res) => {
-  const mongoClient = new MongoClient(DATABASE_URL);
-  console.log('Connecting to MongoDB...');
-
-  try {
-    await mongoClient.connect();
-    console.log('Successfully connected to MongoDB!');
-    const db = mongoClient.db()
-    const collection = db.collection('hotels');
-    res.send(await collection.find().toArray())
-  } finally {
-    await mongoClient.close();
-  }
-})
-
+app.use("/", hotelRouter);
 app.listen(PORT, () => {
-  console.log(`API Server Started at ${PORT}`)
-})
+  console.log(`API Server Started at ${PORT}`);
+});
+
+process.on("SIGINT", async () => {
+  console.log("Received SIGINT. Performing graceful shutdown.");
+  await gracefulShutdown();
+  process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+  console.log("Received SIGTERM. Performing graceful shutdown.");
+  await gracefulShutdown();
+  process.exit(0);
+});
