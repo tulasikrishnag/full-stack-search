@@ -88,7 +88,40 @@ For larger or more time-intensive changes, you're welcome to outline your ideas 
 
 ### Write-up
 
-<!-- Write-up/conclusion section -->
+- The changes are implemented according to the above requirement. I have added the code comments on the improvements for production ready. 
+
+Below are the changes incorporated into the existing code base.
+
+Front-end:
+- Created individual child components to render on navigation.
+- Keep App.tsx to handle the routing and moved the search logic and rendering the result into a separate component
+- Added debounce to search onchange to avoid calling api on each key stroke.
+- Added shared Redirect component to navigate to hotel,city or country.
+
+Back-end:
+ - Updated index.ts to handle closing db connection and stop mongodb server when it is development when process is terminated
+ - Moved the db connection as singleton pattern using connection pool mechanism to avoid multiple connections. 
+ - Created controller, routes, services for making code more modular and follows single responsibilty.
+ - Created a middleware to sanitize the query param.
+ - Create a local cache to store and fetch data
+ - Added unit tests to cover the code. 
+
+Observations/Improvements:
+
+Front-end:
+- Add better errror handling at front-end and display Techincal Error component in case of failures.
+- Memoize the data at front-end to avoid calling back-end. However, it is strongly depended on how frequent the data changes.
+- Good to show no data found when the given search didn't return any data.
+- Navigate to hotel,city,country I have avoided the passing the name in the path. It is not a good practice if the name is longer. In general, it is good to pass the id. But city and country comes from the hotel object. Either use the hotelId in the path however,it depends on the further enhancements to the navigation.
+- The search string is not restrict to fixed length. In future, if the data grows drastically we can extend the ui to implement windowing techique which improves the app performance.
+
+Back-end:
+- Use stable cache providers like Redis and determine the cache busting strategy depends on how frequent the data changes.
+- Improve error handling and logging.
+- Extend mongodb query to include skip and limit for better performance if the data grows largely depends on the business need.
+- Add authentication to validate the request. 
+
+
 
 _When all the behaviour is implemented, feel free to add some observations or conclusions you like to share in the section_
 
